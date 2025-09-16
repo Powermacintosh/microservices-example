@@ -25,6 +25,16 @@ class ConfigurationCORS(BaseModel):
         'Authorization',
         'Access-Control-Allow-Origin',
     ]
+
+
+class ConfigurationKafka(BaseModel):
+    #########################
+    #         KAFKA         #
+    #########################
+    BOOTSTRAP: str = os.getenv('KAFKA_BOOTSTRAP', 'kafka:9092')
+    CLIENT_ID: str = os.getenv('KAFKA_CLIENT_ID', 'gateway_app')
+    TOPIC: str = os.getenv('KAFKA_TOPIC', 'task_events')
+    GROUP_ID: str = os.getenv('KAFKA_GROUP_ID', 'gateway_app_group')
  
 class Setting(BaseSettings):
     # FASTAPI
@@ -36,5 +46,8 @@ class Setting(BaseSettings):
     
     # CORS
     cors: ConfigurationCORS = ConfigurationCORS()
+
+    # KAFKA
+    kafka: ConfigurationKafka = ConfigurationKafka()
     
 settings = Setting()

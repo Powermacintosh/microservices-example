@@ -38,8 +38,3 @@ async def unit_of_work() -> AsyncIterator[UnitOfWork]:
         raise e
     finally:
         await uow.close()
-
-
-async def get_uow() -> AsyncIterator[UnitOfWork]:
-    async with unit_of_work() as uow:
-        yield uow

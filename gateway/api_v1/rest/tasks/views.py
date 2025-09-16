@@ -9,9 +9,16 @@ from .schemas import (
     TaskFilters
 )
 from infrastructure.tasks_facade import task_facade
+from infrastructure.kafka.producer import producer
+from core.config import settings
 
+import logging.config
+from core.logger import logger_config
 
-router, router_list = APIRouter(tags=['Tasks']), APIRouter(tags=['Tasks'])
+logging.config.dictConfig(logger_config)
+kafka_logger = logging.getLogger('kafka_logger')
+
+router, router_list, router_worker = APIRouter(tags=['Tasks']), APIRouter(tags=['Tasks']), APIRouter(tags=['Task Worker Events'])
 
 
 @router.get('/{task_id}/', response_model=SchemaTask, status_code=status.HTTP_200_OK)
@@ -30,7 +37,6 @@ async def get_task(task_id: Annotated[str, Path]):
         HTTPException: При возникновении ошибки.
     """
     return await task_facade.get_task(task_id=task_id)
-
 
 @router.post('/create', response_model=SchemaTask, status_code=status.HTTP_201_CREATED)
 async def create_task(task: TaskCreate):
@@ -169,3 +175,17 @@ async def get_list_tasks(
         column_search=filters.column_search,
         input_search=filters.input_search,
     )
+
+@router_worker.post('/create_event', status_code=status.HTTP_201_CREATED)
+async def send_task_creation_event(task: TaskCreate):
+    event = {
+        'event': 'TaskCreation',
+        'task': task.model_dump()
+    }
+    try:
+        await producer.send_and_wait(topic=settings.kafka.TOPIC, value=event)
+        kafka_logger.info('Сообщение успешно отправлено в topic task_events')
+    except Exception as e:
+        kafka_logger.exception('Ошибка отправки сообщения в topic task_events', exc_info=e)
+        raise HTTPException(status_code=503, detail=f'Ошибка отправки сообщения в topic task_events: {e}')
+    return {'status': 'published'}
