@@ -1,0 +1,102 @@
+services:
+  gateway_app:
+    build:
+      context: gateway/
+    container_name: gateway_app
+    env_file:
+      - ./gateway/.env
+    ports:
+      - "${GATEWAY_PORT}:${GATEWAY_PORT}"
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        poetry run uvicorn main:app \
+          --host 0.0.0.0 \
+          --port ${GATEWAY_PORT}
+    depends_on:
+      loki:
+        condition: service_started
+
+  tasks_app:
+    build:
+      context: tasks/
+    container_name: tasks_app
+    env_file:
+      - ./tasks/.env
+    ports:
+      - "${TASKS_APP_PORT}"
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        chmod +x /app/scripts/*.sh &&
+        /app/scripts/init_db.sh &&
+        poetry run uvicorn main:app \
+          --host 0.0.0.0 \
+          --port ${TASKS_APP_PORT}
+    depends_on:
+      db_tasks_app:
+        condition: service_healthy
+      loki:
+        condition: service_started
+
+  db_tasks_app:
+    image: postgres:17
+    container_name: db_tasks_app
+    env_file:
+      - ./tasks/.env
+    environment:
+      POSTGRES_USER: ${TASKS_DB_USER} 
+      POSTGRES_PASSWORD: ${TASKS_DB_PASS}
+      POSTGRES_DB: ${TASKS_DB_NAME}
+    ports:
+      - "${TASKS_DB_PORT}"
+    volumes:
+      - db_tasks_app:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${TASKS_DB_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - "${LOKI_PORT}"
+    volumes:
+      - ./loki-config.yaml:/etc/loki/local-config.yaml
+      - loki_data:/loki
+    command:
+      - -config.expand-env=true
+      - -config.file=/etc/loki/local-config.yaml
+    environment:
+      LOKI_PORT: ${LOKI_PORT}
+
+  promtail:
+    image: grafana/promtail:latest
+    volumes:
+      - ./promtail-config.yaml:/etc/promtail/config.yaml
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command:
+      - -config.expand-env=true
+      - -config.file=/etc/promtail/config.yaml
+    environment:
+      LOKI_URL: http://loki:${LOKI_PORT}/loki/api/v1/push
+    depends_on:
+      - loki
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "${GRAFANA_PORT}:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+
+volumes:
+  db_tasks_app:
+  loki_data:
+  grafana_data:

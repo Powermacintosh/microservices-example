@@ -1,0 +1,42 @@
+services:
+  tasks_app_test:
+    build:
+      context: tasks/
+    container_name: tasks_app_test
+    env_file:
+      - ./tasks/.env.test
+    ports:
+      - "${TASKS_APP_PORT}"
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        chmod +x /app/scripts/*.sh &&
+        /app/scripts/init_test_db.sh &&
+        poetry run uvicorn main:app \
+          --host 0.0.0.0 \
+          --port ${TASKS_APP_PORT}
+    depends_on:
+      db_tasks_app_test:
+        condition: service_healthy
+
+  db_tasks_app_test:
+    image: postgres:17
+    container_name: db_tasks_app_test
+    env_file:
+      - ./tasks/.env.test
+    environment:
+      POSTGRES_USER: ${TASKS_DB_USER} 
+      POSTGRES_PASSWORD: ${TASKS_DB_PASS}
+      POSTGRES_DB: ${TASKS_DB_NAME}
+    ports:
+      - "${TASKS_DB_PORT}"
+    volumes:
+      - db_tasks_app_test:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${TASKS_DB_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db_tasks_app_test:
