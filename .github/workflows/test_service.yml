@@ -1,4 +1,4 @@
-name: CI
+name: CI | test_service
 
 on: [push, pull_request]
 
