@@ -91,7 +91,7 @@ class TaskRepository:
 
     async def update_task(
         self,
-        task: SchemaTask,
+        task: Task,
         task_update: TaskUpdate | TaskUpdatePartial,
         partial: bool = False,
     ) -> Optional[Task]:
@@ -105,7 +105,7 @@ class TaskRepository:
         
     async def delete_task(
         self,
-        task: SchemaTask,
+        task: Task,
     ) -> None:
         await self.session.delete(task)
         await self.session.flush()

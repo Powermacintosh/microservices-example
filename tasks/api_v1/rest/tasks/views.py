@@ -2,6 +2,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status, Path
 from .dependencies import get_task_service, task_by_id
 from .service import TaskService
+from infrastructure.database.models import Task
 from .schemas import (
     TaskCreate,
     SchemaTask,
@@ -54,7 +55,7 @@ async def get_task(task: SchemaTask = Depends(task_by_id)):
 @router.put('/{task_id}/', response_model=SchemaTask, status_code=status.HTTP_200_OK)
 async def update_task(
     task_update: TaskUpdate,
-    task: SchemaTask = Depends(task_by_id),
+    task: Task = Depends(task_by_id),
     service: TaskService = Depends(get_task_service),
 ):
     """
@@ -79,7 +80,7 @@ async def update_task(
 @router.patch('/{task_id}/', response_model=SchemaTask, status_code=status.HTTP_200_OK)
 async def update_partial_task(
     task_update: TaskUpdatePartial,
-    task: SchemaTask = Depends(task_by_id),
+    task: Task = Depends(task_by_id),
     service: TaskService = Depends(get_task_service),
 ):
     """
@@ -104,7 +105,7 @@ async def update_partial_task(
 
 @router.delete('/{task_id}/', status_code=status.HTTP_204_NO_CONTENT)
 async def delete_task(
-    task: SchemaTask = Depends(task_by_id),
+    task: Task = Depends(task_by_id),
     service: TaskService = Depends(get_task_service),
 ):
     """

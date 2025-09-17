@@ -41,7 +41,7 @@ class ExternalServiceFacade:
                 elif method == 'patch':
                     response = await client.patch(
                         f'{self.base_url}/api/v1/{endpoint}',
-                        json=data.model_dump(),
+                        json=data.model_dump(exclude_unset=True),
                         follow_redirects=True
                     )
                 elif method == 'delete':
