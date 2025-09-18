@@ -20,6 +20,25 @@ services:
         condition: service_started
       kafka:
         condition: service_healthy
+  
+  locust_gateway:
+    build:
+      context: gateway/
+    container_name: locust_gateway
+    env_file:
+      - ./gateway/.env
+    ports:
+      - "8089:8089"
+    networks:
+      - appnet
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        poetry run locust -f locustfile.py \
+          --host http://gateway_app:${GATEWAY_PORT}
+    depends_on:
+      gateway_app:
+        condition: service_started
 
   tasks_app:
     build:

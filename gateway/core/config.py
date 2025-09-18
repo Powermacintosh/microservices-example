@@ -26,7 +26,6 @@ class ConfigurationCORS(BaseModel):
         'Access-Control-Allow-Origin',
     ]
 
-
 class ConfigurationKafka(BaseModel):
     #########################
     #         KAFKA         #
@@ -35,8 +34,13 @@ class ConfigurationKafka(BaseModel):
     CLIENT_ID: str = os.getenv('KAFKA_CLIENT_ID', 'gateway_app')
     TOPIC: str = os.getenv('KAFKA_TOPIC', 'task_events')
     GROUP_ID: str = os.getenv('KAFKA_GROUP_ID', 'gateway_app_group')
+    STARTUP_RETRIES: int = os.getenv('KAFKA_STARTUP_RETRIES', 3)
+    RETRY_BACKOFF: float = os.getenv('KAFKA_RETRY_BACKOFF', 1.0)
  
 class Setting(BaseSettings):
+    # ENV
+    MODE: str = os.getenv('MODE', 'development')
+
     # FASTAPI
     api_v1_prefix: str = '/api/v1'
     api_v1_port: int = os.getenv('GATEWAY_PORT', 5000)

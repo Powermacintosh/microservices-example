@@ -18,6 +18,28 @@ services:
     depends_on:
       db_tasks_app_test:
         condition: service_healthy
+      kafka_test:
+        condition: service_healthy
+
+  tasks_app_worker_test:
+    build:
+      context: tasks/
+    container_name: tasks_app_worker_test
+    env_file:
+      - ./tasks/.env.test
+    environment:
+      SERVICE_NAME: tasks_app_test
+      KAFKA_BOOTSTRAP: kafka_test:9092
+      KAFKA_GROUP_ID: tasks_app_group_test
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        python worker.py
+    depends_on:
+      db_tasks_app_test:
+        condition: service_healthy
+      kafka_test:
+        condition: service_healthy
 
   db_tasks_app_test:
     image: postgres:17
@@ -37,6 +59,31 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  kafka_test:
+    image: bitnami/kafka:latest
+    container_name: kafka_test
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_CFG_NODE_ID: 1
+      KAFKA_CFG_PROCESS_ROLES: "controller,broker"
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "1@kafka_test:9093"
+      KAFKA_CFG_LISTENERS: "CONTROLLER://:9093,PLAINTEXT://:9092"
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT"
+      KAFKA_CFG_ADVERTISED_LISTENERS: "PLAINTEXT://kafka_test:9092"
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+      KAFKA_CFG_LOG_RETENTION_HOURS: "72"  # 3 дня
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "kafka-topics.sh --list --bootstrap-server localhost:9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
 
 volumes:
   db_tasks_app_test:

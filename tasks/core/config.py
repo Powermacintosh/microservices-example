@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
 import os
-from dotenv import load_dotenv
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings
 
@@ -9,9 +8,6 @@ class ConfigurationDB(BaseModel):
     #########################
     #  PostgreSQL database  #
     #########################
-    load_dotenv()
-    
-    MODE: str = os.getenv('MODE')
     
     DB_USER: str = os.getenv('TASKS_DB_USER')
     DB_PASS: str = os.getenv('TASKS_DB_PASS')
@@ -52,13 +48,18 @@ class ConfigurationKafka(BaseModel):
     #########################
     #         KAFKA         #
     #########################
-    load_dotenv()
     
     BOOTSTRAP: str = os.getenv('KAFKA_BOOTSTRAP', 'kafka:9092')
     TOPIC: str = os.getenv('KAFKA_TOPIC', 'task_events')
     GROUP_ID: str = os.getenv('KAFKA_GROUP_ID', 'tasks_app_group')
+    CLIENT_ID: str = os.getenv('KAFKA_CLIENT_ID', 'tasks_app')
+    STARTUP_RETRIES: int = os.getenv('KAFKA_STARTUP_RETRIES', 3)
+    RETRY_BACKOFF: float = os.getenv('KAFKA_RETRY_BACKOFF', 1.0)
 
 class Setting(BaseSettings):
+    # ENV
+    MODE: str = os.getenv('MODE', 'development')
+
     # FASTAPI
     api_v1_prefix: str = '/api/v1'
     api_v1_port: int = os.getenv('TASKS_APP_PORT', 5001)

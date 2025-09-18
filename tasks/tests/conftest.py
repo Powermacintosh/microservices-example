@@ -1,20 +1,17 @@
 import pytest
-from main import app
-from sqlalchemy.ext.asyncio import AsyncSession
 from typing import AsyncIterator
+from aiokafka import AIOKafkaConsumer
 from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import (
-    create_async_engine,
-    async_sessionmaker,
-)
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from main import app
 from core.config import settings
 
 
 @pytest.hookimpl(tryfirst=True)
 def pytest_collection_modifyitems(config, items):
-    if settings.db.MODE != 'TEST':
+    if settings.MODE != 'TEST':
         for item in items:
-            item.add_marker(pytest.mark.skip(reason=f'В режиме {settings.db.MODE}, тесты недоступны!'))
+            item.add_marker(pytest.mark.skip(reason=f'В режиме {settings.MODE}, тесты недоступны!'))
 
 class TestingUnitOfWork:
     def __init__(self, session: AsyncSession):
@@ -58,4 +55,21 @@ async def testing_db_connection() -> AsyncIterator[TestingUnitOfWork]:
 async def httpx_client():
     async with AsyncClient(base_url=f'http://tasks_app_test:{settings.api_v1_port}') as async_client:
         yield async_client
+
+@pytest.fixture(scope='function')
+async def kafka_consumer() -> AIOKafkaConsumer:
+    """Фикстура Kafka Consumer."""
+    consumer = AIOKafkaConsumer(
+        settings.kafka.TOPIC,
+        bootstrap_servers=settings.kafka.BOOTSTRAP,
+        group_id=settings.kafka.GROUP_ID,
+        enable_auto_commit=False,
+        auto_offset_reset='earliest',
+    )
+    await consumer.start()
+    try:
+        yield consumer
+    finally:
+        await consumer.stop()
+
 

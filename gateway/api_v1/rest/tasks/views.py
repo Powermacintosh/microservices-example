@@ -1,4 +1,4 @@
-from fastapi import APIRouter,Query, status, Path
+from fastapi import APIRouter,Query, status, Path, Depends
 from typing import Annotated
 from .schemas import (
     SchemaTask,
@@ -9,7 +9,7 @@ from .schemas import (
     TaskFilters
 )
 from infrastructure.tasks_facade import task_facade
-from infrastructure.kafka.producer import producer
+from .dependencies import AIOKafkaProducer, get_producer
 from core.config import settings
 
 import logging.config
@@ -177,7 +177,10 @@ async def get_list_tasks(
     )
 
 @router_worker.post('/create_event', status_code=status.HTTP_201_CREATED)
-async def send_task_creation_event(task: TaskCreate):
+async def send_task_creation_event(
+    task: TaskCreate,
+    producer: AIOKafkaProducer = Depends(get_producer)
+):
     event = {
         'event': 'TaskCreation',
         'task': task.model_dump()

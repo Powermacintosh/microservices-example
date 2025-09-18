@@ -6,7 +6,12 @@ from .service import TaskService
 from infrastructure.database.models import Task
 from .decorators import handle_errors
 from .exceptions import TaskNotFoundException
+from aiokafka import AIOKafkaProducer
 
+
+async def get_producer() -> AIOKafkaProducer:
+    from main import app
+    return app.state.kafka_producer
 
 async def get_uow() -> AsyncIterator[UnitOfWork]:
     async with unit_of_work() as uow:

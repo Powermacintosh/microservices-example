@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.openapi.docs import get_swagger_ui_html
 from core.config import settings
 from api_v1.rest import router as router_v1
-from infrastructure.kafka.entry import lifespan
+from infrastructure.kafka.producer import lifespan
 
 import logging.config
 from core.logger import logger_config

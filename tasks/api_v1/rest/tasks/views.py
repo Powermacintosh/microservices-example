@@ -1,6 +1,11 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, status, Path
-from .dependencies import get_task_service, task_by_id
+from .dependencies import (
+    get_task_service,
+    task_by_id,
+    AIOKafkaProducer,
+    get_producer
+)
 from .service import TaskService
 from infrastructure.database.models import Task
 from .schemas import (
@@ -10,6 +15,14 @@ from .schemas import (
     TaskUpdatePartial,
     TasksResponseSchema
 )
+# from infrastructure.kafka.producer import producer
+from core.config import settings
+
+import logging.config
+from core.logger import logger_config
+
+logging.config.dictConfig(logger_config)
+kafka_logger = logging.getLogger('kafka_logger')
 
 router, router_list = APIRouter(tags=['Tasks']), APIRouter(tags=['Tasks'])
 
@@ -160,3 +173,20 @@ async def get_list_tasks(
         column_search=column_search,
         input_search=input_search,
     )
+
+@router.post('/create_event', status_code=status.HTTP_201_CREATED)
+async def send_task_creation_event(
+    task: TaskCreate,
+    producer: AIOKafkaProducer = Depends(get_producer)
+):
+    event = {
+        'event': 'TaskModuleCreation',
+        'task': task.model_dump()
+    }
+    try:
+        await producer.send_and_wait(topic=settings.kafka.TOPIC, value=event)
+        kafka_logger.info('Сообщение успешно отправлено в topic task_events')
+    except Exception as e:
+        kafka_logger.exception('Ошибка отправки сообщения в topic task_events', exc_info=e)
+        raise HTTPException(status_code=503, detail=f'Ошибка отправки сообщения в topic task_events: {e}')
+    return {'status': 'published'}

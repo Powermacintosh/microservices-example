@@ -1,9 +1,9 @@
 import uvicorn
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from core.config import settings
 from api_v1.rest import router as router_v1
+from infrastructure.kafka.producer import lifespan
 
 import logging.config
 from core.logger import logger_config
@@ -14,8 +14,7 @@ app = FastAPI(
     title='Tasks API',
     description='API for tasks',
     version='1.0.0',
-    # docs_url=None,
-    # redoc_url=None,
+    lifespan=lifespan,
 )
 
 app.add_middleware(
