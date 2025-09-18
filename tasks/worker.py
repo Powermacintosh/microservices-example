@@ -3,6 +3,8 @@ from aiokafka import AIOKafkaConsumer, TopicPartition
 from api_v1.rest.tasks.dependencies import unit_of_work
 from api_v1.rest.tasks.service import TaskService
 from api_v1.rest.tasks.schemas import TaskCreate
+from datetime import datetime
+
 from core.config import settings
 
 import logging.config
@@ -49,11 +51,13 @@ async def run_consumer():
         bootstrap_servers=settings.kafka.BOOTSTRAP,
         group_id=settings.kafka.GROUP_ID,
         enable_auto_commit=False,
-        auto_offset_reset='earliest'
+        auto_offset_reset='earliest' # начать с самого старого сообщения
     )
     await consumer.start()
     try:
         async for msg in consumer:
+            logger.info('Сообщение от %s: %s...' % (datetime.fromtimestamp(msg.timestamp/1000), msg.value[:100]))
+            logger.info('Сообщение содержит - топик: %s, партиция: %s, offset: %s, ключ: %s, значение: %s, время: %s', msg.topic, msg.partition, msg.offset, msg.key, msg.value, msg.timestamp)
             await handle_message(msg, consumer)
     finally:
         await consumer.stop()
