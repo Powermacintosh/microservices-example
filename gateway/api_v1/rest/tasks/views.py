@@ -187,7 +187,14 @@ async def send_task_creation_event(
     }
     try:
         await producer.send_and_wait(topic=settings.kafka.TOPIC, value=event)
-        kafka_logger.info('Сообщение успешно отправлено в topic task_events')
+        kafka_logger.info('Сообщение успешно отправлено', extra={
+            'tags': {
+                'topic': settings.kafka.TOPIC,
+                'event': event['event'],
+                'task_title': event['task']['title'],
+                'task_description': event['task']['description'],
+            }
+        })
     except Exception as e:
         kafka_logger.exception('Ошибка отправки сообщения в topic task_events', exc_info=e)
         raise HTTPException(status_code=503, detail=f'Ошибка отправки сообщения в topic task_events: {e}')

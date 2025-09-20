@@ -3,7 +3,7 @@ from fastapi import Path, Depends
 from infrastructure.database.uow import UnitOfWork, unit_of_work
 from .service import TaskService
 
-from infrastructure.database.models import Task
+from core.models import Task
 from .decorators import handle_errors
 from .exceptions import TaskNotFoundException
 from aiokafka import AIOKafkaProducer

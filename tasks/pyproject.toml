@@ -32,5 +32,5 @@ pytest-cov = "^7.0.0"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
-addopts = "--cov=api_v1 --cov=infrastructure/database/repositories --cov-report=term-missing"
+addopts = "--cov=api_v1 --cov=core/repositories --cov-report=term-missing"
 python_files = "test_*.py"

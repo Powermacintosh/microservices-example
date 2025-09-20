@@ -1,4 +1,4 @@
-from infrastructure.database.models import Task
+from core.models import Task
 from .schemas import (
     TaskCreate,
     SchemaTask,

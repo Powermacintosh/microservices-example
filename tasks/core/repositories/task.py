@@ -1,8 +1,8 @@
 from sqlalchemy import select, update, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
-from infrastructure.database.models import Task
-from infrastructure.database.models.task import TaskStatus
+from core.models import Task
+from core.models.task import TaskStatus
 from api_v1.rest.tasks.schemas import (
     TaskCreate,
     SchemaTask,

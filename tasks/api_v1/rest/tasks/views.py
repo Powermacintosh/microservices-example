@@ -7,7 +7,7 @@ from .dependencies import (
     get_producer
 )
 from .service import TaskService
-from infrastructure.database.models import Task
+from core.models import Task
 from .schemas import (
     TaskCreate,
     SchemaTask,
