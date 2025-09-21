@@ -1,4 +1,4 @@
-import pytest
+import pytest, asyncio, uuid
 from typing import AsyncIterator
 from aiokafka import AIOKafkaConsumer
 from httpx import AsyncClient
@@ -62,12 +62,14 @@ async def kafka_consumer() -> AIOKafkaConsumer:
     consumer = AIOKafkaConsumer(
         settings.kafka.TOPIC,
         bootstrap_servers=settings.kafka.BOOTSTRAP,
-        group_id=settings.kafka.GROUP_ID,
+        group_id=f'test-group-{uuid.uuid4()}',
         enable_auto_commit=False,
         auto_offset_reset='earliest',
     )
     await consumer.start()
     try:
+        await asyncio.sleep(1)
+        await consumer.seek_to_beginning()
         yield consumer
     finally:
         await consumer.stop()

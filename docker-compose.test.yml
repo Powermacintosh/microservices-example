@@ -30,7 +30,6 @@ services:
     environment:
       SERVICE_NAME: tasks_app_test
       KAFKA_BOOTSTRAP: kafka_test:9092
-      KAFKA_GROUP_ID: tasks_app_group_test
     entrypoint: ["sh", "-c"]
     command:
       - |
