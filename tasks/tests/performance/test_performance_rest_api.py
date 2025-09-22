@@ -7,9 +7,10 @@ class TestPerformanceTaskRestAPI:
     """
     Тесты производительности для REST API менеджера задач.
     """
-    @pytest.mark.skipif(sys.platform == 'linux', reason='Тест работает только на Linux')
-    def test_only_on_linux(self):
-        # Тест, который работает только на Linux.
+    @pytest.mark.skipif(sys.platform not in ('darwin', 'linux'), reason='Тест работает только на MacOS или Linux')
+    def test_only_on_macos_or_linux(self):
+        # Тест, который работает только на MacOS или Linux.
+        print(f'Текущая ОС: {sys.platform}')
         assert True
 
     def setup_method(self):

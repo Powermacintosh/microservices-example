@@ -61,6 +61,10 @@ logger_config = {
             '()': 'core.logger.ServiceNameFilter',
             'service_name': 'tasks_microservice_uvicorn'
         },
+        'kafka': {
+            '()': 'core.logger.ServiceNameFilter',
+            'service_name': 'tasks_microservice_kafka'
+        },
     },
     'handlers': {
         'console': {
@@ -109,6 +113,30 @@ logger_config = {
             'level': 'INFO',
             'propagate': False,
             'filters': ['uvicorn'],
+        },
+        'kafka_logger': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+            'filters': ['kafka'],
+        },
+        'aiokafka.cluster': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+            'filters': ['kafka'],
+        },
+        'aiokafka.consumer.subscription_state': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+            'filters': ['kafka'],
+        },
+        'aiokafka.consumer.group_coordinator': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+            'filters': ['kafka'],
         },
     },
 }

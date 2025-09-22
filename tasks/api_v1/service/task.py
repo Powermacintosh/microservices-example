@@ -1,5 +1,5 @@
-from infrastructure.database.models import Task
-from .schemas import (
+from core.models import Task
+from core.schemas.tasks import (
     TaskCreate,
     SchemaTask,
     TaskUpdate,
@@ -40,7 +40,7 @@ class TaskService:
 
     async def update_task(
         self,
-        task: SchemaTask,
+        task: Task,
         task_update: TaskUpdate | TaskUpdatePartial,
         partial: bool = False,
     ) -> Optional[Task]:
@@ -52,7 +52,7 @@ class TaskService:
 
     async def delete_task(
         self,
-        task: SchemaTask,
+        task: Task,
     ) -> None:
         return await self.uow.tasks.delete_task(task)
         

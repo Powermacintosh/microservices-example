@@ -1,12 +1,21 @@
-from typing import Annotated
+from typing import Annotated, AsyncIterator
 from fastapi import Path, Depends
-from infrastructure.database.uow import UnitOfWork, get_uow
-from .service import TaskService
+from infrastructure.database.uow import UnitOfWork, unit_of_work
+from api_v1.service.task import TaskService
 
-from infrastructure.database.models import Task
+from core.models import Task
 from .decorators import handle_errors
 from .exceptions import TaskNotFoundException
+from aiokafka import AIOKafkaProducer
 
+
+async def get_producer() -> AIOKafkaProducer:
+    from main import app
+    return app.state.kafka_producer
+
+async def get_uow() -> AsyncIterator[UnitOfWork]:
+    async with unit_of_work() as uow:
+        yield uow
 
 def get_task_service(uow: UnitOfWork = Depends(get_uow)) -> TaskService:
     return TaskService(uow)

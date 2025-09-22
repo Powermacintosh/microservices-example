@@ -54,6 +54,10 @@ logger_config = {
             '()': 'core.logger.ServiceNameFilter',
             'service_name': 'gateway_microservice_httpx'
         },
+        'kafka': {
+            '()': 'core.logger.ServiceNameFilter',
+            'service_name': 'gateway_microservice_kafka'
+        },
     },
     'handlers': {
         'console': {
@@ -90,6 +94,12 @@ logger_config = {
             'level': 'INFO',
             'propagate': False,
             'filters': ['httpx'],
+        },
+        'kafka_logger': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+            'filters': ['kafka'],
         },
     },
 }

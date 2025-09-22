@@ -1,10 +1,9 @@
 import pytest
 from sqlalchemy import select
 from typing import AsyncIterator
-
-from infrastructure.database.models.task import Task, TaskStatus
-from infrastructure.database.repositories.task import TaskRepository
-from api_v1.rest.tasks.schemas import TaskCreate, TaskUpdate, TaskUpdatePartial
+from core.models.task import Task, TaskStatus
+from core.repositories.task import TaskRepository
+from core.schemas.tasks import TaskCreate, TaskUpdate, TaskUpdatePartial
 
 class TestTaskRepository:
     """Тесты для TaskRepository"""

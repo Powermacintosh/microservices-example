@@ -1,11 +1,14 @@
-import uvicorn
-
+import uvicorn, strawberry
+from strawberry.fastapi import GraphQLRouter
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.openapi.docs import get_swagger_ui_html
 from core.config import settings
 from api_v1.rest import router as router_v1
+from infrastructure.kafka.producer import lifespan
+from api_v1.graphql.tasks.resolvers import Query, Mutation
+
 
 import logging.config
 from core.logger import logger_config
@@ -16,8 +19,10 @@ app = FastAPI(
     title='API Gateway',
     description='API Gateway for microservices',
     version='1.0.0',
+    lifespan=lifespan,
     # docs_url=None,
     # redoc_url=None,
+    # openapi_url=None,
 )
 
 app.mount('/static', StaticFiles(directory='static'), name='static')
@@ -40,6 +45,16 @@ app.add_middleware(
 
 app.include_router(router=router_v1, prefix=settings.api_v1_prefix)
 
+schema = strawberry.Schema(
+    query=Query,
+    mutation=Mutation
+)
+graphql_app = GraphQLRouter(schema)
+app.include_router(
+    router=graphql_app,
+    prefix=settings.api_v1_prefix + '/graphql',
+    include_in_schema=False
+)
 
 if __name__ == '__main__':
     uvicorn.run('main:app', host='0.0.0.0', port=settings.api_v1_port, reload=True)

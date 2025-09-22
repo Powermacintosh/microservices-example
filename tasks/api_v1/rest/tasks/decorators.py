@@ -1,11 +1,11 @@
 from functools import wraps
 from fastapi import HTTPException, status
 from typing import Callable, TypeVar, Any
-from infrastructure.database.exceptions import (
-    DatabaseIntegrityError,
-    DatabaseConnectionError,
-    DatabaseQueryError,
-    DatabaseTimeoutError
+from sqlalchemy.exc import (
+    SQLAlchemyError,
+    IntegrityError,
+    OperationalError,
+    TimeoutError
 )
 from .exceptions import (
     TaskNotFoundException
@@ -25,38 +25,38 @@ def handle_errors(func: Callable[..., T]) -> Callable[..., T]:
     async def wrapper(*args: Any, **kwargs: Any) -> T:
         try:
             return await func(*args, **kwargs)
-        except DatabaseIntegrityError as e:
-            logger.exception('Ошибка целостности данных', exc_info=e)
+        except IntegrityError as e:
+            logger.debug('Ошибка целостности данных', exc_info=e)
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail=str(e) or 'Конфликт данных'
             )
-        except (DatabaseConnectionError, DatabaseTimeoutError) as e:
-            logger.exception('Сервис временно недоступен', exc_info=e)
+        except (OperationalError, TimeoutError) as e:
+            logger.debug('Сервис временно недоступен', exc_info=e)
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail='Сервис временно недоступен'
             )
-        except DatabaseQueryError as e:
-            logger.exception('Некорректный запрос', exc_info=e)
+        except SQLAlchemyError as e:
+            logger.debug('Некорректный запрос', exc_info=e)
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail='Некорректный запрос'
             )
         except TaskNotFoundException as e:
-            logger.exception('Задача не найдена', exc_info=e)
+            logger.debug('Задача не найдена', exc_info=e)
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=str(e),
             )
         except ValueError as e:
-            logger.exception('Некорректные данные', exc_info=e)
+            logger.debug('Некорректные данные', exc_info=e)
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=str(e) or 'Некорректные данные'
             )
         except Exception as e:
-            logger.exception('Неожиданная ошибка', exc_info=e)
+            logger.debug('Неожиданная ошибка', exc_info=e)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail='Внутренняя ошибка сервера'

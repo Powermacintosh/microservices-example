@@ -1,14 +1,27 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, status, Path
-from .dependencies import get_task_service, task_by_id
-from .service import TaskService
-from .schemas import (
+from .dependencies import (
+    get_task_service,
+    task_by_id,
+    AIOKafkaProducer,
+    get_producer
+)
+from api_v1.service.task import TaskService
+from core.models import Task
+from core.schemas.tasks import (
     TaskCreate,
     SchemaTask,
     TaskUpdate,
     TaskUpdatePartial,
     TasksResponseSchema
 )
+from core.config import settings
+
+import logging.config
+from core.logger import logger_config
+
+logging.config.dictConfig(logger_config)
+kafka_logger = logging.getLogger('kafka_logger')
 
 router, router_list = APIRouter(tags=['Tasks']), APIRouter(tags=['Tasks'])
 
@@ -54,7 +67,7 @@ async def get_task(task: SchemaTask = Depends(task_by_id)):
 @router.put('/{task_id}/', response_model=SchemaTask, status_code=status.HTTP_200_OK)
 async def update_task(
     task_update: TaskUpdate,
-    task: SchemaTask = Depends(task_by_id),
+    task: Task = Depends(task_by_id),
     service: TaskService = Depends(get_task_service),
 ):
     """
@@ -79,7 +92,7 @@ async def update_task(
 @router.patch('/{task_id}/', response_model=SchemaTask, status_code=status.HTTP_200_OK)
 async def update_partial_task(
     task_update: TaskUpdatePartial,
-    task: SchemaTask = Depends(task_by_id),
+    task: Task = Depends(task_by_id),
     service: TaskService = Depends(get_task_service),
 ):
     """
@@ -104,7 +117,7 @@ async def update_partial_task(
 
 @router.delete('/{task_id}/', status_code=status.HTTP_204_NO_CONTENT)
 async def delete_task(
-    task: SchemaTask = Depends(task_by_id),
+    task: Task = Depends(task_by_id),
     service: TaskService = Depends(get_task_service),
 ):
     """
@@ -159,3 +172,20 @@ async def get_list_tasks(
         column_search=column_search,
         input_search=input_search,
     )
+
+@router.post('/create_event', status_code=status.HTTP_201_CREATED)
+async def send_task_creation_event(
+    task: TaskCreate,
+    producer: AIOKafkaProducer = Depends(get_producer)
+):
+    event = {
+        'event': 'TaskModuleCreation',
+        'task': task.model_dump()
+    }
+    try:
+        await producer.send_and_wait(topic=settings.kafka.TOPIC, value=event)
+        kafka_logger.info('Сообщение успешно отправлено в topic task_events')
+    except Exception as e:
+        kafka_logger.exception('Ошибка отправки сообщения в topic task_events', exc_info=e)
+        raise HTTPException(status_code=503, detail=f'Ошибка отправки сообщения в topic task_events: {e}')
+    return {'status': 'published'}

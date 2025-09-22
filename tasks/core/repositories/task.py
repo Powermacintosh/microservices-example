@@ -1,9 +1,9 @@
 from sqlalchemy import select, update, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
-from infrastructure.database.models import Task
-from infrastructure.database.models.task import TaskStatus
-from api_v1.rest.tasks.schemas import (
+from core.models import Task
+from core.models.task import TaskStatus
+from core.schemas.tasks import (
     TaskCreate,
     SchemaTask,
     TaskUpdate,
@@ -46,14 +46,18 @@ class TaskRepository:
 
             elif column_search == 'status':
                 if input_search.upper() == 'CREATED':
-                    stmt = stmt.where(Task.status == TaskStatus.CREATED)
+                    status_condition = Task.status == TaskStatus.CREATED
                 elif input_search.upper() == 'IN_PROGRESS':
-                    stmt = stmt.where(Task.status == TaskStatus.IN_PROGRESS)
+                    status_condition = Task.status == TaskStatus.IN_PROGRESS
                 elif input_search.upper() == 'COMPLETED':
-                    stmt = stmt.where(Task.status == TaskStatus.COMPLETED)
+                    status_condition = Task.status == TaskStatus.COMPLETED
                 else:
                     logger.exception('Неизвестный статус задачи: %s', input_search)
                     raise ValueError(f'Неизвестный статус задачи: {input_search}')
+                
+                # Apply the same status filter to both queries
+                stmt = stmt.where(status_condition)
+                total_stmt = total_stmt.where(status_condition)
 
         total_result = await self.session.execute(total_stmt)
         total_tasks = total_result.scalar() or 0
@@ -91,7 +95,7 @@ class TaskRepository:
 
     async def update_task(
         self,
-        task: SchemaTask,
+        task: Task,
         task_update: TaskUpdate | TaskUpdatePartial,
         partial: bool = False,
     ) -> Optional[Task]:
@@ -105,7 +109,7 @@ class TaskRepository:
         
     async def delete_task(
         self,
-        task: SchemaTask,
+        task: Task,
     ) -> None:
         await self.session.delete(task)
         await self.session.flush()
