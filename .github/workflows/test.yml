@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: ["main"]
+    branches: [main, experiment/workflows]
   pull_request:
-    branches: ["main"]
+    branches: [main]
 
 jobs:
   tests:
@@ -17,8 +17,8 @@ jobs:
       - name: Build and start test services
         run: docker compose -f docker-compose.test.yml --env-file ./tasks/.env.test up -d --build
 
-      - name: Run pytest inside tasks_app_test
-        run: docker compose -f docker-compose.test.yml --env-file ./tasks/.env.test exec -T tasks_app_test pytest -v
+      - name: Run tests
+        run: docker compose -f docker-compose.test.yml --env-file ./tasks/.env.test exec -T tasks_app_test pytest
 
       - name: Stop and remove test services
         if: always()
