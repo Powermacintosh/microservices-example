@@ -38,9 +38,7 @@
    cd microservices-example
    ```
 
-2. Создайте файл `.env` на основе `.env.test`:
-
-3. Запустите приложение с помощью Makefile:
+2. Запустите приложение с помощью Makefile:
 
 ```bash
 make build
@@ -54,14 +52,19 @@ make test
 
 ## 📚 Документация API
 
-После запуска документация API будет доступна по адресу:
+После запуска документация API Gateway будет доступна по адресу:
 
 - Swagger UI: http://localhost:5000/docs/
   ![gateway/static/swagger-custom.png](gateway/static/swagger-custom.png)
 
-## 🔧 Настройка окружения
+Также API Gateway предоставляет возможность работы с API через GraphQL.
 
-Создайте файл `.env` в корне проекта и в каждом сервисе
+- GraphQL UI: http://localhost:5000/api/v1/graphql
+  ![gateway/static/graphql-interface.png](gateway/static/graphql-interface.png)
+
+## 🔧 Настройка окружения для разработки
+
+Создайте файл `.env` в корне сервиса
 `gateway/`, `tasks/`.
 Аналогично файлу `.env.test`.
 
@@ -79,15 +82,24 @@ MODE = DEVELOPMENT
 
 ### Подключение Loki к Grafana
 
-**Loki-connection-url**: `http://loki:3100`
+#### Путь для подключения Loki к Grafana
+
+`Connections` => `Loki` => `Add new data source`
+
+- **Connection-url**: `http://loki:3100`
+- ⚙️ **Save & Test**
+
+#### Путь для просмотра логов в Grafana
+
+`Drilldown` => `Logs`
 
 ## 🎯 Подключение к Kafka-UI
 
-**Kafka-UI-connection-url**: `http://localhost:8080`
+**Kafka-UI**: `http://localhost:8080`
 
 ## 🧪 Запуск нагрузочного тестирования Locust
 
-**Locust-connection-url**: `http://localhost:8089`
+**Locust**: `http://localhost:8089`
 
 ## 📄 Лицензия
 

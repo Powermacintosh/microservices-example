@@ -1,0 +1,12 @@
+query GetTasks($status: TaskStatusGQL, $offset: Int!, $limit: Int!) {
+  tasks(status: $status, offset: $offset, limit: $limit) {
+    tasks {
+      id
+      title
+      description
+      status
+    }
+    total
+    pagesCount
+  }
+}

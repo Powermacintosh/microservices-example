@@ -3,7 +3,7 @@ from sqlalchemy import exc
 from typing import AsyncIterator
 from pydantic import ValidationError
 from core.repositories.task import TaskRepository
-from api_v1.rest.tasks.schemas import TaskCreate
+from core.schemas.tasks import TaskCreate
 
 class TestTaskPydanticValidation:
     """Тесты валидации данных задачи."""

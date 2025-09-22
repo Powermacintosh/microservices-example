@@ -1,7 +1,7 @@
 from typing import Annotated, AsyncIterator
 from fastapi import Path, Depends
 from infrastructure.database.uow import UnitOfWork, unit_of_work
-from .service import TaskService
+from api_v1.service.task import TaskService
 
 from core.models import Task
 from .decorators import handle_errors

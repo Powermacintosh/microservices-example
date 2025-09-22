@@ -1,8 +1,8 @@
 import asyncio, json
 from aiokafka import AIOKafkaConsumer, TopicPartition, ConsumerRecord
 from api_v1.rest.tasks.dependencies import unit_of_work
-from api_v1.rest.tasks.service import TaskService
-from api_v1.rest.tasks.schemas import TaskCreate
+from api_v1.service.task import TaskService
+from core.schemas.tasks import TaskCreate
 from core.config import settings
 
 import logging.config

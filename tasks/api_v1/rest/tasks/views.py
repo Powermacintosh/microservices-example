@@ -6,16 +6,15 @@ from .dependencies import (
     AIOKafkaProducer,
     get_producer
 )
-from .service import TaskService
+from api_v1.service.task import TaskService
 from core.models import Task
-from .schemas import (
+from core.schemas.tasks import (
     TaskCreate,
     SchemaTask,
     TaskUpdate,
     TaskUpdatePartial,
     TasksResponseSchema
 )
-# from infrastructure.kafka.producer import producer
 from core.config import settings
 
 import logging.config

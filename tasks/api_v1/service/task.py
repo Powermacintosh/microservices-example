@@ -1,5 +1,5 @@
 from core.models import Task
-from .schemas import (
+from core.schemas.tasks import (
     TaskCreate,
     SchemaTask,
     TaskUpdate,

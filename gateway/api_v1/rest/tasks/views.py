@@ -18,7 +18,7 @@ from core.logger import logger_config
 logging.config.dictConfig(logger_config)
 kafka_logger = logging.getLogger('kafka_logger')
 
-router, router_list, router_worker = APIRouter(tags=['Tasks']), APIRouter(tags=['Tasks']), APIRouter(tags=['Task Worker Events'])
+router, router_list, router_worker = APIRouter(tags=['Task']), APIRouter(tags=['Tasks']), APIRouter(tags=['Task Worker Events'])
 
 
 @router.get('/{task_id}/', response_model=SchemaTask, status_code=status.HTTP_200_OK)

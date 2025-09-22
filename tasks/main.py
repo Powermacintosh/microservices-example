@@ -1,9 +1,12 @@
-import uvicorn
+import uvicorn, strawberry
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from core.config import settings
-from api_v1.rest import router as router_v1
+from api_v1.rest import router as rest_api_router_v1
 from infrastructure.kafka.producer import lifespan
+from strawberry.fastapi import GraphQLRouter
+from api_v1.graphql.tasks.resolvers import Mutation, Query
+from api_v1.graphql.context import get_context_wrapper
 
 import logging.config
 from core.logger import logger_config
@@ -15,6 +18,9 @@ app = FastAPI(
     description='API for tasks',
     version='1.0.0',
     lifespan=lifespan,
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None
 )
 
 app.add_middleware(
@@ -25,7 +31,24 @@ app.add_middleware(
     allow_headers=settings.cors.headers,
 )
 
-app.include_router(router=router_v1, prefix=settings.api_v1_prefix)
+app.include_router(router=rest_api_router_v1, prefix=settings.api_v1_prefix)
+
+schema = strawberry.Schema(
+    query=Query,
+    mutation=Mutation
+)
+graphql_app = GraphQLRouter(
+    schema=schema,
+    context_getter=get_context_wrapper,
+    graphiql=True,
+    multipart_uploads_enabled=True
+)
+
+app.include_router(
+    router=graphql_app,
+    prefix=settings.api_v1_prefix + '/graphql',
+    include_in_schema=False
+)
 
 
 if __name__ == '__main__':

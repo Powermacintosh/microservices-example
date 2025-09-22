@@ -1,9 +1,10 @@
 # -*- encoding: utf-8 -*-
 import os
+from dotenv import load_dotenv
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings
 
-
+load_dotenv()
 class ConfigurationCORS(BaseModel):
     #########################
     #         CORS          #
@@ -39,14 +40,14 @@ class ConfigurationKafka(BaseModel):
  
 class Setting(BaseSettings):
     # ENV
-    MODE: str = os.getenv('MODE', 'development')
+    MODE: str = os.getenv('MODE', 'DEVELOPMENT')
 
     # FASTAPI
     api_v1_prefix: str = '/api/v1'
     api_v1_port: int = os.getenv('GATEWAY_PORT', 5000)
     
     # MICROSERVICES
-    tasks_microservice_url: str = os.getenv('TASKS_MICROSERVICE_URL', 'http://tasks_app:5001')
+    tasks_microservice_url: str = os.getenv('TASKS_MICROSERVICE_URL', 'http://localhost:5001')
     
     # CORS
     cors: ConfigurationCORS = ConfigurationCORS()

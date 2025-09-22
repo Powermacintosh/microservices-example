@@ -1,8 +1,10 @@
 # -*- encoding: utf-8 -*-
 import os
+from dotenv import load_dotenv
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings
 
+load_dotenv()
 
 class ConfigurationDB(BaseModel):
     #########################
@@ -58,7 +60,7 @@ class ConfigurationKafka(BaseModel):
 
 class Setting(BaseSettings):
     # ENV
-    MODE: str = os.getenv('MODE', 'development')
+    MODE: str = os.getenv('MODE', 'DEVELOPMENT')
 
     # FASTAPI
     api_v1_prefix: str = '/api/v1'

@@ -10,7 +10,3 @@ router = APIRouter()
 router.include_router(router=tasks_router, prefix='/task')
 router.include_router(router=tasks_list_router, prefix='/tasks')
 router.include_router(router=tasks_worker_router, prefix='/task')
-
-
-
-
