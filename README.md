@@ -57,7 +57,7 @@ make test
 - Swagger UI: http://localhost:5000/docs/
   ![gateway/static/swagger-custom.png](gateway/static/swagger-custom.png)
 
-Также API Gateway предоставляет возможность работы с API через GraphQL.
+Также API Gateway предоставляет возможность работы с API через GraphQL:
 
 - GraphQL UI: http://localhost:5000/api/v1/graphql
   ![gateway/static/graphql-interface.png](gateway/static/graphql-interface.png)

@@ -40,7 +40,7 @@ schema = strawberry.Schema(
 graphql_app = GraphQLRouter(
     schema=schema,
     context_getter=get_context_wrapper,
-    graphiql=True,
+    graphql_ide='graphiql',
     multipart_uploads_enabled=True
 )
 
