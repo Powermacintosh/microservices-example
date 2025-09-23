@@ -4,7 +4,7 @@ services:
       context: tasks/
     container_name: tasks_app_test
     env_file:
-      - ./tasks/.env.test
+      - .env.test
     ports:
       - "${TASKS_APP_PORT}"
     entrypoint: ["sh", "-c"]
@@ -26,7 +26,7 @@ services:
       context: tasks/
     container_name: tasks_app_worker_test
     env_file:
-      - ./tasks/.env.test
+      - .env.test
     environment:
       SERVICE_NAME: tasks_app_test
       KAFKA_BOOTSTRAP: kafka_test:9092
@@ -44,7 +44,7 @@ services:
     image: postgres:17
     container_name: db_tasks_app_test
     env_file:
-      - ./tasks/.env.test
+      - .env.test
     environment:
       POSTGRES_USER: ${TASKS_DB_USER} 
       POSTGRES_PASSWORD: ${TASKS_DB_PASS}
